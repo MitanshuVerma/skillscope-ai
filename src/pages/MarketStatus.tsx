@@ -12,7 +12,11 @@ function MarketStatus() {
   useEffect(() => {
     const fetchMarketStatus = async () => {
       try {
-        const res = await fetch(`${API_URL}/api/market-status`);
+        const token = localStorage.getItem('token');
+        const headers: any = {};
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        const res = await fetch(`${API_URL}/api/market-status`, { headers });
         if (!res.ok) throw new Error("Failed to fetch market status");
         const json = await res.json();
         setData(json);

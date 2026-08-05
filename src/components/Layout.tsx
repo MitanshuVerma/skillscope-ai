@@ -29,7 +29,7 @@ export function Logo() {
 }
 
 export function Navbar() {
-  const { user, loading } = useAuth();
+  const { user, loading, logout } = useAuth();
 
   const handleGoogleLogin = () => {
     window.location.href = `${API_URL}/api/auth/google`;
@@ -82,12 +82,12 @@ export function Navbar() {
                 )}
                 <span className="text-sm font-medium">{user.name}</span>
               </Link>
-              <a
-                href={`${API_URL}/api/auth/logout`}
+              <button
+                onClick={logout}
                 className="text-sm font-medium text-slate-400 transition hover:text-white"
               >
                 Logout
-              </a>
+              </button>
             </>
           ) : (
             <button

@@ -18,9 +18,13 @@ function AvailableJobs() {
   const fetchJobs = async () => {
     setLoading(true);
     try {
+      const token = localStorage.getItem('token');
+      const headers: any = { "Content-Type": "application/json" };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
       const res = await fetch(`${API_URL}/api/jobs`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({ 
           query: [query, ...selectedCategories].filter(Boolean).join(" "), 
           skills: user?.skills || [], 

@@ -35,9 +35,10 @@ function ResumeAI() {
   const handleClearData = async () => {
       try {
           if (user) {
+              const token = localStorage.getItem('token');
               const res = await fetch(`${API_URL}/api/auth/clear-skills`, {
                   method: 'POST',
-                  credentials: 'include'
+                  headers: token ? { 'Authorization': `Bearer ${token}` } : {}
               });
               if (!res.ok) {
                   const errText = await res.text();
@@ -78,10 +79,11 @@ function ResumeAI() {
             const formData = new FormData();
             formData.append('resume', file);
             
+            const token = localStorage.getItem('token');
             const res = await fetch(`${API_URL}/api/upload-resume`, {
                 method: 'POST',
                 body: formData,
-                credentials: 'include',
+                headers: token ? { 'Authorization': `Bearer ${token}` } : {}
             });
             const data = await res.json();
             if (!res.ok) {
@@ -109,10 +111,14 @@ function ResumeAI() {
     setLoading(true);
     setError(null);
     try {
+        const token = localStorage.getItem('token');
+        const headers: any = { 'Content-Type': 'application/json' };
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
         // Fetch Jobs
         const jobsRes = await fetch(`${API_URL}/api/jobs`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers,
             body: JSON.stringify({ skills, location: 'us' })
         });
         const jobsData = await jobsRes.json();
@@ -121,7 +127,7 @@ function ResumeAI() {
         // Fetch Insights
         const insightsRes = await fetch(`${API_URL}/api/insights`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers,
             body: JSON.stringify({ userSkills: skills, jobs: jobsData.jobs || [] })
         });
         const insightsData = await insightsRes.json();

@@ -12,7 +12,11 @@ function TrendingJobs() {
   useEffect(() => {
     const fetchTrending = async () => {
       try {
-        const res = await fetch(`${API_URL}/api/trending-jobs`);
+        const token = localStorage.getItem('token');
+        const headers: any = {};
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        const res = await fetch(`${API_URL}/api/trending-jobs`, { headers });
         if (!res.ok) throw new Error("Failed to fetch trending jobs");
         const json = await res.json();
         setData(json);

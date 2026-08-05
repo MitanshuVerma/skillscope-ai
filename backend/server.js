@@ -2,7 +2,6 @@ require("dotenv").config();
 
 const express = require("express");
 const cors = require("cors");
-const session = require("express-session");
 const passport = require("passport");
 
 const connectDB = require("./config/db");
@@ -23,23 +22,8 @@ app.use(cors({
 
 app.use(express.json({ limit: '10mb' }));
 
-// Sessions
-app.set("trust proxy", 1);
-app.use(
-    session({
-        secret: process.env.SESSION_SECRET || 'secret',
-        resave: false,
-        saveUninitialized: false,
-        cookie: {
-            secure: true,
-            sameSite: 'none'
-        }
-    })
-);
-
-// Passport middleware
+// Passport initialize
 app.use(passport.initialize());
-app.use(passport.session());
 
 // Routes
 const jobRoutes = require("./routes/jobRoutes");
