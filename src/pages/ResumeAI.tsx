@@ -3,7 +3,7 @@ import { FileText, Upload, Loader2, CheckCircle, ChevronRight, Briefcase, Trendi
 import { AppShell, PageHero } from "../components/Layout";
 import { useAuth } from "../context/AuthContext";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API_URL = import.meta.env.PROD ? "" : "http://localhost:5000";
 
 function ResumeAI() {
   const { user, setUser } = useAuth();

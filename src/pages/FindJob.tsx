@@ -3,7 +3,7 @@ import { Briefcase, MapPin, Search, Loader2 } from "lucide-react";
 import { AppShell, PageHero } from "../components/Layout";
 import { useAuth } from "../context/AuthContext";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API_URL = import.meta.env.PROD ? "" : "http://localhost:5000";
 function FindJob() {
   const { user, loading: authLoading } = useAuth();
   const [jobs, setJobs] = useState<any[]>([]);
