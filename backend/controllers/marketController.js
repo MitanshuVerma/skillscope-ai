@@ -37,7 +37,7 @@ Return the result strictly as JSON in the following format, with no markdown cod
 }`;
 
         const response = await ai.models.generateContent({
-            model: 'gemini-3.5-flash',
+            model: 'gemini-1.5-flash',
             contents: prompt,
             config: {
                 responseMimeType: 'application/json',
@@ -80,7 +80,7 @@ Return the result strictly as JSON in the following format, with no markdown cod
 }`;
 
         const response = await ai.models.generateContent({
-            model: 'gemini-3.5-flash',
+            model: 'gemini-1.5-flash',
             contents: prompt,
             config: {
                 responseMimeType: 'application/json',
