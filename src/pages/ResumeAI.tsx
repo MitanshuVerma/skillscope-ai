@@ -3,6 +3,8 @@ import { FileText, Upload, Loader2, CheckCircle, ChevronRight, Briefcase, Trendi
 import { AppShell, PageHero } from "../components/Layout";
 import { useAuth } from "../context/AuthContext";
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
 function ResumeAI() {
   const { user, setUser } = useAuth();
   
@@ -33,7 +35,7 @@ function ResumeAI() {
   const handleClearData = async () => {
       try {
           if (user) {
-              const res = await fetch('http://localhost:5000/api/auth/clear-skills', {
+              const res = await fetch(`${API_URL}/api/auth/clear-skills`, {
                   method: 'POST',
                   credentials: 'include'
               });
@@ -76,7 +78,7 @@ function ResumeAI() {
             const formData = new FormData();
             formData.append('resume', file);
             
-            const res = await fetch('http://localhost:5000/api/upload-resume', {
+            const res = await fetch(`${API_URL}/api/upload-resume`, {
                 method: 'POST',
                 body: formData,
                 credentials: 'include',
@@ -108,7 +110,7 @@ function ResumeAI() {
     setError(null);
     try {
         // Fetch Jobs
-        const jobsRes = await fetch('http://localhost:5000/api/jobs', {
+        const jobsRes = await fetch(`${API_URL}/api/jobs`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ skills, location: 'us' })
@@ -117,7 +119,7 @@ function ResumeAI() {
         setJobs(jobsData.jobs || []);
 
         // Fetch Insights
-        const insightsRes = await fetch('http://localhost:5000/api/insights', {
+        const insightsRes = await fetch(`${API_URL}/api/insights`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userSkills: skills, jobs: jobsData.jobs || [] })

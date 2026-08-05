@@ -2,6 +2,8 @@ import { ArrowRight, Sparkles } from "lucide-react";
 
 import { Logo } from "../components/Layout";
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
 function LaunchPage() {
   return (
     <main className="launch-bg bg-grid min-h-screen overflow-hidden text-white">
@@ -29,7 +31,7 @@ function LaunchPage() {
           </p>
 
           <a
-            href="http://localhost:5000/api/auth/google"
+            href={`${API_URL}/api/auth/google`}
             className="mx-auto mt-12 inline-flex items-center gap-4 rounded-2xl bg-white px-8 py-4 text-lg font-bold text-black transition hover:scale-[1.02]"
           >
             <span className="text-xl">G</span>

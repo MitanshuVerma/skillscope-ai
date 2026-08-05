@@ -3,6 +3,8 @@ import { Link, NavLink } from "react-router-dom";
 import { Sparkles, LogIn } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
 const navItems = [
   { label: "Dashboard", to: "/dashboard" },
   { label: "Find a Job", to: "/find-job" },
@@ -30,7 +32,7 @@ export function Navbar() {
   const { user, loading } = useAuth();
 
   const handleGoogleLogin = () => {
-    window.location.href = "http://localhost:5000/api/auth/google";
+    window.location.href = `${API_URL}/api/auth/google`;
   };
 
   return (
@@ -81,7 +83,7 @@ export function Navbar() {
                 <span className="text-sm font-medium">{user.name}</span>
               </Link>
               <a
-                href="http://localhost:5000/api/auth/logout"
+                href={`${API_URL}/api/auth/logout`}
                 className="text-sm font-medium text-slate-400 transition hover:text-white"
               >
                 Logout

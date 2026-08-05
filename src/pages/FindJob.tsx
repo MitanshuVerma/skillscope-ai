@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { Briefcase, MapPin, Search, Loader2 } from "lucide-react";
 import { AppShell, PageHero } from "../components/Layout";
 import { useAuth } from "../context/AuthContext";
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 function FindJob() {
   const { user, loading: authLoading } = useAuth();
   const [jobs, setJobs] = useState<any[]>([]);
@@ -12,7 +14,7 @@ function FindJob() {
   const fetchJobs = async () => {
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/api/jobs", {
+      const res = await fetch(`${API_URL}/api/jobs`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 

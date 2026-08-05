@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { AppShell, PageHero } from "../components/Layout";
 import { Loader2, AlertCircle } from "lucide-react";
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
 function MarketStatus() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -10,7 +12,7 @@ function MarketStatus() {
   useEffect(() => {
     const fetchMarketStatus = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/market-status");
+        const res = await fetch(`${API_URL}/api/market-status`);
         if (!res.ok) throw new Error("Failed to fetch market status");
         const json = await res.json();
         setData(json);

@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
 interface User {
     _id: string;
     googleId: string;
@@ -24,7 +26,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     useEffect(() => {
         const fetchUser = async () => {
             try {
-                const response = await fetch('http://localhost:5000/api/auth/current-user', {
+                const response = await fetch(`${API_URL}/api/auth/current-user`, {
                     credentials: 'include' // Important for session cookies
                 });
                 if (response.ok) {

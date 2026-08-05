@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { AppShell, PageHero } from "../components/Layout";
 import { Loader2, AlertCircle } from "lucide-react";
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
 function TrendingJobs() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -10,7 +12,7 @@ function TrendingJobs() {
   useEffect(() => {
     const fetchTrending = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/trending-jobs");
+        const res = await fetch(`${API_URL}/api/trending-jobs`);
         if (!res.ok) throw new Error("Failed to fetch trending jobs");
         const json = await res.json();
         setData(json);
