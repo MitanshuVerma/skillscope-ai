@@ -1,17 +1,54 @@
-import { Search } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Search, Loader2 } from "lucide-react";
 import { AppShell, PageHero } from "../components/Layout";
-import { jobs } from "../lib/mockData";
+import { useAuth } from "../context/AuthContext";
 
 const categories = ["Engineering", "Data", "Design", "Marketing", "Sales", "Support", "HR", "Finance"];
-const locations = ["Remote", "Bengaluru", "Hyderabad", "Delhi NCR", "Mumbai"];
 
 function AvailableJobs() {
+  const { user, loading: authLoading } = useAuth();
+  const [jobs, setJobs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [query, setQuery] = useState("");
+  const [locationStr, setLocationStr] = useState("");
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+
+  const fetchJobs = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("http://localhost:5000/api/jobs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          query: [query, ...selectedCategories].filter(Boolean).join(" "), 
+          skills: user?.skills || [], 
+          location: locationStr || 'us' 
+        }),
+      });
+      const data = await res.json();
+      if (data.jobs) {
+        setJobs(data.jobs);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!authLoading) {
+      fetchJobs();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, authLoading]); // Re-fetch when user loads so we get their skills
+
   return (
     <AppShell>
       <PageHero
         eyebrow="Live Listings"
         title="Available Jobs"
-        subtitle="Aggregated openings from LinkedIn, Indeed, Wellfound, Naukri and partner sources."
+        subtitle="Aggregated openings matching your profile and search query."
       />
 
       <section className="page-container py-10">
@@ -19,10 +56,24 @@ function AvailableJobs() {
           <div className="grid gap-2 lg:grid-cols-[1.2fr_1fr_auto]">
             <div className="flex items-center gap-3 px-4">
               <Search className="h-5 w-5 text-slate-400" />
-              <input className="input-dark border-0 bg-transparent" placeholder="Search job title, skill, or company" />
+              <input 
+                className="input-dark border-0 bg-transparent" 
+                placeholder="Search job title or extra skills" 
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && fetchJobs()}
+              />
             </div>
-            <input className="input-dark border-0 bg-transparent" placeholder="City, country, or remote" />
-            <button className="btn-primary">Search</button>
+            <input 
+              className="input-dark border-0 bg-transparent" 
+              placeholder="City, country, or remote" 
+              value={locationStr}
+              onChange={(e) => setLocationStr(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && fetchJobs()}
+            />
+            <button onClick={fetchJobs} className="btn-primary flex items-center justify-center gap-2">
+                {loading && <Loader2 className="h-4 w-4 animate-spin" />} Search
+            </button>
           </div>
         </div>
 
@@ -35,29 +86,28 @@ function AvailableJobs() {
               <div className="mt-4 space-y-3">
                 {categories.map((cat) => (
                   <label key={cat} className="flex items-center gap-3 text-muted">
-                    <input type="checkbox" />
+                    <input 
+                      type="checkbox" 
+                      checked={selectedCategories.includes(cat)}
+                      onChange={(e) => {
+                        if (e.target.checked) setSelectedCategories([...selectedCategories, cat]);
+                        else setSelectedCategories(selectedCategories.filter(c => c !== cat));
+                      }}
+                    />
                     {cat}
                   </label>
                 ))}
               </div>
             </div>
-
-            <div className="mt-8">
-              <p className="section-label text-xs">Location</p>
-              <div className="mt-4 space-y-3">
-                {locations.map((loc) => (
-                  <label key={loc} className="flex items-center gap-3 text-muted">
-                    <input type="checkbox" />
-                    {loc}
-                  </label>
-                ))}
-              </div>
-            </div>
+            
+            <button onClick={fetchJobs} disabled={loading} className="btn-primary mt-8 w-full flex items-center justify-center gap-2">
+                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Apply Filters'}
+            </button>
           </aside>
 
           <div>
             <div className="mb-4 flex items-center justify-between">
-              <p className="text-muted">24 jobs</p>
+              <p className="text-muted">{jobs.length} jobs found</p>
               <select className="input-dark max-w-[170px]">
                 <option>Most recent</option>
                 <option>Highest salary</option>
@@ -79,22 +129,41 @@ function AvailableJobs() {
                   </tr>
                 </thead>
                 <tbody>
-                  {jobs.map((job) => (
-                    <tr key={job.id} className="border-t border-white/10">
-                      <td className="px-5 py-5 font-bold">{job.title}</td>
-                      <td className="px-5 py-5 text-muted">{job.company}</td>
-                      <td className="px-5 py-5 text-muted">{job.location}</td>
-                      <td className="px-5 py-5">
-                        <span className="pill">{job.category}</span>
-                      </td>
-                      <td className="px-5 py-5 text-muted">{job.salary}</td>
-                      <td className="px-5 py-5 text-muted">{job.posted}</td>
-                      <td className="px-5 py-5 text-muted">{job.source}</td>
-                      <td className="px-5 py-5">
-                        <button className="font-semibold text-blue-400">Apply ↗</button>
+                  {loading ? (
+                    <tr>
+                      <td colSpan={8} className="px-5 py-10 text-center text-muted">
+                        <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2" />
+                        Fetching jobs...
                       </td>
                     </tr>
-                  ))}
+                  ) : jobs.length === 0 ? (
+                    <tr>
+                      <td colSpan={8} className="px-5 py-10 text-center text-muted">
+                        No jobs found. Try adjusting your search query.
+                      </td>
+                    </tr>
+                  ) : (
+                    jobs.map((job, idx) => (
+                      <tr key={idx} className="border-t border-white/10">
+                        <td className="px-5 py-5 font-bold">{job.title}</td>
+                        <td className="px-5 py-5 text-muted">{job.company_name || 'Company'}</td>
+                        <td className="px-5 py-5 text-muted">{job.candidate_required_location || 'Remote'}</td>
+                        <td className="px-5 py-5">
+                          <span className="pill">{job.job_type || 'Full Time'}</span>
+                        </td>
+                        <td className="px-5 py-5 text-muted">{job.salary || 'Unspecified'}</td>
+                        <td className="px-5 py-5 text-muted">Recent</td>
+                        <td className="px-5 py-5 text-muted">JSearch</td>
+                        <td className="px-5 py-5">
+                          {job.url ? (
+                            <a href={job.url} target="_blank" rel="noreferrer" className="font-semibold text-blue-400 hover:underline">Apply ↗</a>
+                          ) : (
+                            <span className="text-slate-500">N/A</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>

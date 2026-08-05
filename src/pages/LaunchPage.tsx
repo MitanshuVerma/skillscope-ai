@@ -7,9 +7,6 @@ function LaunchPage() {
     <main className="launch-bg bg-grid min-h-screen overflow-hidden text-white">
       <div className="page-container flex h-24 items-center justify-between">
         <Logo />
-        <Link to="/dashboard" className="text-sm text-slate-300 hover:text-white">
-          Skip intro →
-        </Link>
       </div>
 
       <section className="flex min-h-[calc(100vh-96px)] items-center justify-center px-6 pb-24 text-center">
@@ -31,14 +28,14 @@ function LaunchPage() {
             Find jobs, analyze your resume, track market trends, and discover the skills you need to grow.
           </p>
 
-          <Link
-            to="/dashboard"
+          <a
+            href="http://localhost:5000/api/auth/google"
             className="mx-auto mt-12 inline-flex items-center gap-4 rounded-2xl bg-white px-8 py-4 text-lg font-bold text-black transition hover:scale-[1.02]"
           >
             <span className="text-xl">G</span>
             Continue with Google
             <ArrowRight className="h-5 w-5" />
-          </Link>
+          </a>
 
           <p className="mt-5 text-sm text-slate-400">
             By continuing you agree to our Terms and Privacy Policy

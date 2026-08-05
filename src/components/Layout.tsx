@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Link, NavLink } from "react-router-dom";
-import { Sparkles } from "lucide-react";
+import { Sparkles, LogIn } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
 
 const navItems = [
   { label: "Dashboard", to: "/dashboard" },
@@ -26,6 +27,12 @@ export function Logo() {
 }
 
 export function Navbar() {
+  const { user, loading } = useAuth();
+
+  const handleGoogleLogin = () => {
+    window.location.href = "http://localhost:5000/api/auth/google";
+  };
+
   return (
     <header className="glass-nav sticky top-0 z-50">
       <div className="page-container flex h-[74px] items-center justify-between">
@@ -51,18 +58,44 @@ export function Navbar() {
         </nav>
 
         <div className="hidden items-center gap-3 lg:flex">
-          <Link
-            to="/profile"
-            className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 py-1.5 pl-1.5 pr-4"
-          >
-            <div className="brand-gradient grid h-8 w-8 place-items-center rounded-full text-sm font-bold">
-              JD
-            </div>
-            <span className="text-sm">Jane D.</span>
-          </Link>
-          <Link to="/" className="text-sm text-slate-400 hover:text-white">
-            Logout
-          </Link>
+          {loading ? (
+            <div className="h-10 w-24 animate-pulse rounded-xl bg-white/5" />
+          ) : user ? (
+            <>
+              <Link
+                to="/profile"
+                className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 py-1.5 pl-1.5 pr-4 transition hover:bg-white/10"
+              >
+                {user.picture ? (
+                  <img
+                    src={user.picture}
+                    alt={user.name}
+                    className="h-8 w-8 rounded-full object-cover"
+                    referrerPolicy="no-referrer"
+                  />
+                ) : (
+                  <div className="brand-gradient grid h-8 w-8 place-items-center rounded-full text-sm font-bold">
+                    {user.name.charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <span className="text-sm font-medium">{user.name}</span>
+              </Link>
+              <a
+                href="http://localhost:5000/api/auth/logout"
+                className="text-sm font-medium text-slate-400 transition hover:text-white"
+              >
+                Logout
+              </a>
+            </>
+          ) : (
+            <button
+              onClick={handleGoogleLogin}
+              className="flex items-center gap-2 rounded-xl bg-white/10 px-4 py-2 text-sm font-semibold transition hover:bg-white/20"
+            >
+              <LogIn className="h-4 w-4" />
+              Login with Google
+            </button>
+          )}
         </div>
       </div>
     </header>
