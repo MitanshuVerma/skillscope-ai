@@ -13,8 +13,14 @@ function ResumeAI() {
   const [loading, setLoading] = useState(false);
   const [skills, setSkills] = useState<string[]>(user?.skills || []);
   const [manualSkills, setManualSkills] = useState(user?.skills?.join(", ") || "");
-  const [jobs, setJobs] = useState<any[]>([]);
-  const [insights, setInsights] = useState<any>(null);
+  const [jobs, setJobs] = useState<any[]>(() => {
+    const saved = sessionStorage.getItem('resume_jobs');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [insights, setInsights] = useState<any>(() => {
+    const saved = sessionStorage.getItem('resume_insights');
+    return saved ? JSON.parse(saved) : null;
+  });
   const [error, setError] = useState<string | null>(null);
 
   const [initialLoad, setInitialLoad] = useState(true);
@@ -24,7 +30,12 @@ function ResumeAI() {
       setSkills(user.skills);
       setManualSkills(user.skills.join(", "));
       if (initialLoad) {
-          setStep(2);
+          const hasInsights = sessionStorage.getItem('resume_insights');
+          if (hasInsights) {
+              setStep(3);
+          } else {
+              setStep(2);
+          }
           setInitialLoad(false);
       }
     } else if (user && initialLoad) {
@@ -51,6 +62,10 @@ function ResumeAI() {
           setSkills([]);
           setManualSkills("");
           setFile(null);
+          setJobs([]);
+          setInsights(null);
+          sessionStorage.removeItem('resume_jobs');
+          sessionStorage.removeItem('resume_insights');
           setStep(1);
           setError(null);
       } catch (err: any) {
@@ -132,6 +147,8 @@ function ResumeAI() {
         });
         const insightsData = await insightsRes.json();
         setInsights(insightsData);
+        sessionStorage.setItem('resume_jobs', JSON.stringify(jobsData.jobs || []));
+        sessionStorage.setItem('resume_insights', JSON.stringify(insightsData));
         
         setStep(3);
     } catch (err: any) {
@@ -299,12 +316,15 @@ function ResumeAI() {
                          </div>
                          <div className="space-y-4">
                              {jobs.slice(0, 5).map((job: any, i: number) => (
-                                 <a key={i} href={job.url || '#'} target="_blank" rel="noreferrer" className="block rounded-xl border border-white/5 bg-white/5 p-4 hover:border-white/10 hover:bg-white/10 transition cursor-pointer">
+                                 <a key={i} href={job.url || '#'} target="_blank" rel="noreferrer" className="group block rounded-xl border border-white/5 bg-white/5 p-4 hover:border-purple-500/50 hover:bg-white/10 transition cursor-pointer">
                                      <h4 className="font-bold text-lg">{job.title}</h4>
                                      <p className="text-sm text-purple-300">{job.company?.display_name || job.company?.name || 'Company'}</p>
                                      <div className="mt-3 flex items-center gap-2 text-xs text-muted">
                                          <span className="rounded-md bg-white/10 px-2 py-1">{job.location?.display_name || job.location?.name || 'Remote'}</span>
                                          {job.salary_max && <span className="rounded-md bg-green-500/10 text-green-300 px-2 py-1">${Math.round(job.salary_max)}</span>}
+                                     </div>
+                                     <div className="mt-4 flex justify-end">
+                                        <span className="text-sm font-semibold text-blue-400 group-hover:underline">Apply Now ↗</span>
                                      </div>
                                  </a>
                              ))}
@@ -313,8 +333,9 @@ function ResumeAI() {
                       </div>
                   </div>
 
-                  <div className="mt-12 flex justify-start">
-                    <button onClick={() => setStep(1)} className="btn-secondary">Start Over</button>
+                  <div className="mt-12 flex justify-start gap-4">
+                    <button onClick={() => setStep(1)} className="btn-secondary">Start Over (Upload New)</button>
+                    <button onClick={handleClearData} className="btn-secondary text-red-400 hover:text-red-300 hover:border-red-400/50">Clear Profile Data</button>
                   </div>
               </div>
           )}
