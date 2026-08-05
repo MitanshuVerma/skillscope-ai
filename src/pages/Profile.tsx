@@ -1,7 +1,20 @@
 import { AppShell, PageHero } from "../components/Layout";
-import { skills } from "../lib/mockData";
+import { useAuth } from "../context/AuthContext";
 
 function Profile() {
+  const { user } = useAuth();
+
+  if (!user) {
+    return (
+      <AppShell>
+        <div className="flex h-[50vh] items-center justify-center text-muted">Loading profile...</div>
+      </AppShell>
+    );
+  }
+
+  const initials = user.name
+    ? user.name.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase()
+    : 'U';
   return (
     <AppShell>
       <PageHero
@@ -14,11 +27,11 @@ function Profile() {
         <div className="panel rounded-2xl p-8">
           <div className="flex items-center gap-5">
             <div className="brand-gradient grid h-16 w-16 place-items-center rounded-full text-xl font-bold">
-              JD
+              {initials}
             </div>
             <div>
-              <h2 className="text-2xl font-bold">Jane D.</h2>
-              <p className="text-muted">jane@example.com</p>
+              <h2 className="text-2xl font-bold">{user.name}</h2>
+              <p className="text-muted">{user.email}</p>
             </div>
           </div>
 
@@ -36,11 +49,15 @@ function Profile() {
             <section className="md:col-span-2">
               <h3 className="text-xl font-bold">Skills</h3>
               <div className="mt-4 flex flex-wrap gap-2">
-                {skills.map((skill) => (
-                  <span key={skill} className="pill">
-                    {skill}
-                  </span>
-                ))}
+                {user.skills && user.skills.length > 0 ? (
+                  user.skills.map((skill: string) => (
+                    <span key={skill} className="pill">
+                      {skill}
+                    </span>
+                  ))
+                ) : (
+                  <p className="text-muted text-sm">No skills added yet. Upload a resume to analyze your skills.</p>
+                )}
               </div>
             </section>
 
