@@ -11,10 +11,12 @@ router.get('/google', passport.authenticate('google', { scope: ['profile', 'emai
 // @route   GET /api/auth/google/callback
 router.get(
     '/google/callback',
-    passport.authenticate('google', { failureRedirect: 'http://localhost:5173/' }),
+    (req, res, next) => {
+        passport.authenticate('google', { failureRedirect: `${process.env.CLIENT_URL || 'http://localhost:5173'}/` })(req, res, next);
+    },
     (req, res) => {
         // Successful authentication, redirect to dashboard.
-        res.redirect('http://localhost:5173/dashboard');
+        res.redirect(`${process.env.CLIENT_URL || 'http://localhost:5173'}/dashboard`);
     }
 );
 
@@ -35,7 +37,7 @@ router.get('/current-user', async (req, res) => {
 router.get('/logout', (req, res, next) => {
     req.logout((err) => {
         if (err) { return next(err); }
-        res.redirect('http://localhost:5173/');
+        res.redirect(`${process.env.CLIENT_URL || 'http://localhost:5173'}/`);
     });
 });
 
