@@ -7,16 +7,18 @@ const router = express.Router();
 // @route   GET /api/auth/google
 router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
+const clientUrl = process.env.CLIENT_URL ? process.env.CLIENT_URL.replace(/\/$/, "") : 'http://localhost:5173';
+
 // @desc    Google auth callback
 // @route   GET /api/auth/google/callback
 router.get(
     '/google/callback',
     (req, res, next) => {
-        passport.authenticate('google', { failureRedirect: `${process.env.CLIENT_URL || 'http://localhost:5173'}/` })(req, res, next);
+        passport.authenticate('google', { failureRedirect: `${clientUrl}/` })(req, res, next);
     },
     (req, res) => {
         // Successful authentication, redirect to dashboard.
-        res.redirect(`${process.env.CLIENT_URL || 'http://localhost:5173'}/dashboard`);
+        res.redirect(`${clientUrl}/dashboard`);
     }
 );
 
@@ -37,7 +39,7 @@ router.get('/current-user', async (req, res) => {
 router.get('/logout', (req, res, next) => {
     req.logout((err) => {
         if (err) { return next(err); }
-        res.redirect(`${process.env.CLIENT_URL || 'http://localhost:5173'}/`);
+        res.redirect(`${clientUrl}/`);
     });
 });
 
