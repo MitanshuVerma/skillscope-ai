@@ -13,6 +13,55 @@ let trendingJobsCacheTime = 0;
 
 const CACHE_DURATION = 1000 * 60 * 60; // 1 hour
 
+const defaultMarketStatus = {
+    activeOpenings: "285,400",
+    companiesHiring: "24,800",
+    averageBaseSalary: "$128,500",
+    remoteWorkPercentage: "48%",
+    categories: [
+        { category: "Software Engineering", percent: 42, count: 119868 },
+        { category: "AI & Machine Learning", percent: 22, count: 62788 },
+        { category: "Data & Analytics", percent: 16, count: 45664 },
+        { category: "Product Management", percent: 12, count: 34248 },
+        { category: "Design / UX", percent: 8, count: 22832 }
+    ]
+};
+
+const defaultTrendingJobs = {
+    trendingJobs: [
+        {
+            title: "AI/ML Engineer",
+            demand: "Very High",
+            salary: "$140,000 - $210,000",
+            skills: ["Python", "PyTorch", "Large Language Models (LLMs)"]
+        },
+        {
+            title: "MLOps Engineer",
+            demand: "Very High",
+            salary: "$135,000 - $195,000",
+            skills: ["Kubernetes", "Docker", "CI/CD Pipelines"]
+        },
+        {
+            title: "Data Engineer",
+            demand: "High",
+            salary: "$120,000 - $175,000",
+            skills: ["SQL", "Apache Spark", "Snowflake"]
+        },
+        {
+            title: "Full-Stack AI Developer",
+            demand: "Very High",
+            salary: "$130,000 - $185,000",
+            skills: ["TypeScript", "Next.js", "LangChain"]
+        },
+        {
+            title: "Cloud Solutions Architect",
+            demand: "High",
+            salary: "$150,000 - $220,000",
+            skills: ["AWS", "Terraform", "Distributed Systems"]
+        }
+    ]
+};
+
 const getMarketStatus = async (req, res) => {
     try {
         if (marketStatusCache && (Date.now() - marketStatusCacheTime < CACHE_DURATION)) {
@@ -51,10 +100,10 @@ Return the result strictly as JSON in the following format, with no markdown cod
         marketStatusCache = jsonResult;
         marketStatusCacheTime = Date.now();
 
-        res.json(jsonResult);
+        return res.json(jsonResult);
     } catch (error) {
-        console.error('Error generating market status:', error);
-        res.status(500).json({ error: 'Failed to generate market status' });
+        console.error('Error generating market status, falling back to default data:', error.message);
+        return res.json(marketStatusCache || defaultMarketStatus);
     }
 };
 
@@ -91,13 +140,16 @@ Return the result strictly as JSON in the following format, with no markdown cod
         const cleanedText = rawResponse.replace(/```json/gi, '').replace(/```/g, '').trim();
         const jsonResult = JSON.parse(cleanedText);
 
-        trendingJobsCache = jsonResult;
-        trendingJobsCacheTime = Date.now();
-
-        res.json(jsonResult);
+        if (jsonResult && jsonResult.trendingJobs && Array.isArray(jsonResult.trendingJobs)) {
+            trendingJobsCache = jsonResult;
+            trendingJobsCacheTime = Date.now();
+            return res.json(jsonResult);
+        } else {
+            throw new Error("Invalid structure returned by AI");
+        }
     } catch (error) {
-        console.error('Error generating trending jobs:', error);
-        res.status(500).json({ error: 'Failed to generate trending jobs' });
+        console.error('Error generating trending jobs, falling back to default data:', error.message);
+        return res.json(trendingJobsCache || defaultTrendingJobs);
     }
 };
 
