@@ -1,10 +1,20 @@
-import { ArrowRight, Sparkles } from "lucide-react";
-
+import { ArrowRight, Sparkles, AlertCircle } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Logo } from "../components/Layout";
 
 const API_URL = import.meta.env.PROD ? "" : "http://localhost:5000";
 
 function LaunchPage() {
+  const [authError, setAuthError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const err = params.get("auth_error");
+    if (err) {
+      setAuthError(decodeURIComponent(err));
+    }
+  }, []);
+
   return (
     <main className="launch-bg bg-grid min-h-screen overflow-hidden text-white">
       <div className="page-container flex h-24 items-center justify-between">
@@ -29,6 +39,16 @@ function LaunchPage() {
           <p className="mx-auto mt-4 max-w-3xl text-lg text-muted">
             Find jobs, analyze your resume, track market trends, and discover the skills you need to grow.
           </p>
+
+          {authError && (
+            <div className="mx-auto mt-8 max-w-lg flex items-center gap-3 rounded-xl border border-red-500/40 bg-red-500/10 p-4 text-left text-sm text-red-200">
+              <AlertCircle className="h-5 w-5 shrink-0 text-red-400" />
+              <div>
+                <p className="font-semibold text-red-300">Login Failed</p>
+                <p className="text-red-200/80">{authError}</p>
+              </div>
+            </div>
+          )}
 
           <a
             href={`${API_URL}/api/auth/google`}
