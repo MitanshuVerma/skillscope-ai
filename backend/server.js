@@ -5,7 +5,7 @@ const cors = require("cors");
 const passport = require("passport");
 const mongoose = require("mongoose");
 
-const connectDB = require("./config/db");
+const { connectDB, getDbStatus } = require("./config/db");
 
 // Passport config
 require("./config/passport");
@@ -42,11 +42,20 @@ app.use(express.json({ limit: '10mb' }));
 app.use(passport.initialize());
 
 // Health Check
-app.get("/api/health", (req, res) => {
+app.get("/api/health", async (req, res) => {
     const states = ["disconnected", "connected", "connecting", "disconnecting"];
+    
+    // If disconnected, trigger a reconnect
+    if (mongoose.connection.readyState === 0) {
+        connectDB();
+    }
+
+    const status = getDbStatus();
+
     res.json({
         status: "ok",
         database: states[mongoose.connection.readyState] || "unknown",
+        dbDetails: status,
         timestamp: new Date().toISOString()
     });
 });

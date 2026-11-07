@@ -1,9 +1,16 @@
 const mongoose = require("mongoose");
 
+let lastDbError = null;
+
 const connectDB = async () => {
+    if (mongoose.connection.readyState === 1 || mongoose.connection.readyState === 2) {
+        return;
+    }
+
     try {
         if (!process.env.MONGO_URI) {
-            console.error("CRITICAL: MONGO_URI is not set in environment variables!");
+            lastDbError = "CRITICAL: MONGO_URI is missing from environment variables";
+            console.error(lastDbError);
             return;
         }
 
@@ -11,21 +18,32 @@ const connectDB = async () => {
             serverSelectionTimeoutMS: 5000,
         });
 
+        lastDbError = null;
         console.log(`MongoDB Connected successfully: ${conn.connection.host}`);
     } catch (err) {
+        lastDbError = err.message;
         console.error("MongoDB Connection Failed:", err.message);
-        if (err.message.includes("querySrv ENOTFOUND")) {
-            console.error("ACTION REQUIRED: The MongoDB Atlas cluster could not be resolved. This usually means the free cluster was PAUSED on MongoDB Atlas due to inactivity. Log into https://cloud.mongodb.com and resume the cluster.");
-        }
+        // Automatically retry connection after 5 seconds
+        setTimeout(connectDB, 5000);
     }
 };
 
 mongoose.connection.on("disconnected", () => {
-    console.warn("MongoDB connection lost.");
+    console.warn("MongoDB connection lost. Reconnecting...");
+    setTimeout(connectDB, 3000);
 });
 
 mongoose.connection.on("reconnected", () => {
     console.log("MongoDB reconnected.");
+    lastDbError = null;
 });
 
-module.exports = connectDB;
+const getDbStatus = () => {
+    return {
+        readyState: mongoose.connection.readyState,
+        lastError: lastDbError,
+        hasMongoUri: Boolean(process.env.MONGO_URI),
+    };
+};
+
+module.exports = { connectDB, getDbStatus };

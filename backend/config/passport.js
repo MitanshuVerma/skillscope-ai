@@ -1,6 +1,8 @@
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const mongoose = require('mongoose');
 const User = require('../models/User');
+const { connectDB } = require('./db');
 
 const backendUrl = (
     process.env.BACKEND_URL ||
@@ -18,6 +20,11 @@ passport.use(
         },
         async (accessToken, refreshToken, profile, done) => {
             try {
+                // Ensure database is connected before querying
+                if (mongoose.connection.readyState !== 1) {
+                    await connectDB();
+                }
+
                 const email = profile.emails && profile.emails[0] ? profile.emails[0].value : null;
                 const picture = profile.photos && profile.photos[0] ? profile.photos[0].value : '';
                 const name = profile.displayName || (email ? email.split('@')[0] : 'User');
